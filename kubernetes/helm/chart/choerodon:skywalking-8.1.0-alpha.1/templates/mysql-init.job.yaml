@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}-mysql-init"
+  labels:
+    app: {{ template "skywalking.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ template "skywalking.fullname" . }}-job"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+spec:
+  template:
+    metadata:
+      name: "{{ .Release.Name }}-mysql-init"
+      labels:
+        app: {{ template "skywalking.name" . }}
+        component: "{{ template "skywalking.fullname" . }}-job"
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: Never
+      initContainers:
+      - name: mysqlcheck
+        imagePullPolicy: {{ .Values.mysqlClient.image.pullPolicy }}
+        image: "{{ .Values.mysqlClient.image.repository }}:{{ .Values.mysqlClient.image.tag }}"
+        env:
+        - name: MYSQL_HOST
+          value: "{{ .Values.mysqlClient.env.MYSQL_HOST }}"
+        - name: MYSQL_PORT
+          value: "{{ .Values.mysqlClient.env.MYSQL_PORT }}"
+        - name: MYSQL_USER
+          value: "{{ .Values.mysqlClient.env.MYSQL_USER }}"
+        - name: MYSQL_PASS
+          value: "{{ .Values.mysqlClient.env.MYSQL_PASS }}"
+        args:
+        - -c
+        - $(while ! mysqlcheck --host="${MYSQL_HOST}" --port="${MYSQL_PORT}" --user="${MYSQL_USER}" --password="${MYSQL_PASS}" information_schema; do sleep 3; done)
+        command:
+        - /bin/sh
+      containers:
+      - name: {{ .Values.oap.name }}
+        image: "{{ .Values.oap.image.repository }}:{{ .Values.oap.image.tag }}"
+        imagePullPolicy: {{ .Values.oap.image.pullPolicy }}
+{{- if .Values.oap.resources }}
+        resources:
+{{ toYaml .Values.oap.resources | indent 10 }}
+{{- end }}
+        env:
+        - name: JAVA_OPTS
+          value: "{{ .Values.oap.javaOpts }} -Dmode=init"
+        - name: SW_STORAGE
+          value: "mysql"
+        - name: SW_JDBC_URL
+          value: "jdbc:mysql://{{ .Values.mysqlClient.env.MYSQL_HOST }}:{{ .Values.mysqlClient.env.MYSQL_PORT }}/{{ .Values.mysqlClient.env.MYSQL_DATABASE }}?serverTimezone=Asia/Shanghai"
+        - name: SW_DATA_SOURCE_USER
+          value: "{{ .Values.mysqlClient.env.MYSQL_USER }}"
+        - name: SW_DATA_SOURCE_PASSWORD
+          value: "{{ .Values.mysqlClient.env.MYSQL_PASS }}"
+        {{- range $key, $value :=  .Values.oap.env }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
