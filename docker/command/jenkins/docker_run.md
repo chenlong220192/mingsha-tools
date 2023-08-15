@@ -1,5 +1,17 @@
 - docker run
 
+- jenkins
+```
+docker run \
+    -d \
+    -p 8080:8080 \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v $(which docker):/usr/bin/docker \
+    -v /data/containers/jenkins:/var/jenkins_home \
+    --name jenkins \
+    jenkins/jenkins:2.380-alpine
+```
+
 - network
 ```
 docker network create --subnet 10.0.0.0/24 --ip-range 10.0.0.254/24 jenkins-net
@@ -16,7 +28,7 @@ docker run \
     --network jenkins-net \
     --ip 10.0.0.2 \
     --name jenkins \
-    jenkins/jenkins:2.289.3-lts-alpine
+    jenkins/jenkins:2.380-alpine
 ```
 - slave-01
 ```
@@ -44,4 +56,4 @@ docker run \
 - `-v $(which docker):/usr/bin/docker`将宿主机docker程序映射至jenkins容器内。
 
 - 权限
-`chown -R 200 /data/containers/jenkins`
+`chown -R 1000 /data/containers/jenkins`

@@ -8,5 +8,5 @@
       --restart always \
       --memory 128m \
       --name nginx-dashboard \
-      nginx:1.23.0-alpine
+      nginx:1.23.1-alpine
 ```

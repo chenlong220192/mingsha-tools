@@ -2,7 +2,7 @@
 ```
 docker run -d \
     -p 5000:5000 \
-    -v /data/container/registry:/var/lib/registry \
+    -v /data/containers/registry:/var/lib/registry \
     --name registry \
-    registry:2.7.1
+    registry:2.8.2
 ```

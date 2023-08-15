@@ -19,7 +19,7 @@ controller:
   # Used for label app.kubernetes.io/component
   componentName: "jenkins-controller"
   image: "jenkins/jenkins"
-  tag: "2.360-alpine"
+  tag: "2.413-alpine"
   tagLabel: alpine
   imagePullPolicy: "Always"
   imagePullSecretName:
@@ -31,7 +31,7 @@ controller:
   #      - "uname"
   #      - "-a"
   disableRememberMe: false
-  numExecutors: 0
+  numExecutors: 3
   # configures the executor mode of the Jenkins node. Possible values are: NORMAL or EXCLUSIVE
   executorMode: "NORMAL"
   # This is ignored if enableRawHtmlMarkupFormatter is true
@@ -238,70 +238,80 @@ controller:
 
   # List of plugins to be install during Jenkins controller start
   installPlugins:
-    - kubernetes:3670.v6ca_059233222
-    - workflow-aggregator:590.v6a_d052e5a_a_b_5
-    - git:4.11.3
-    - configuration-as-code:1511.vb_f985b_894e40
+    - kubernetes:3923.v294a_d4250b_91
+    - workflow-aggregator:596.v8c21c963d92d
+    - git:5.1.0
+    - configuration-as-code:1647.ve39ca_b_829b_42
     - configuration-as-code-groovy:1.1
     - localization-zh-cn:1.0.24
-    - jaxb:2.3.6-1
-    - command-launcher:84.v4a_97f2027398
-    - commons-text-api:1.9-9.v39a_53e2e0343
-    - commons-lang3-api:3.12.0.0
-    - jdk-tool:1.5
-    - timestamper:1.18
-    - ws-cleanup:0.42
-    - thinBackup:1.10
-    - blueocean:1.25.5
-    - ansicolor:1.0.1
+    - jaxb:2.3.8-1
+    - command-launcher:100.v2f6722292ee8
+    - commons-text-api:1.10.0-36.vc008c8fcda_7b_
+    - commons-lang3-api:3.12.0-36.vd97de6465d5b_
+    - jdk-tool:66.vd8fa_64ee91b_d
+    - timestamper:1.24
+    - ws-cleanup:0.45
+    - thinBackup:1.17
+    - blueocean:1.27.4
+    - blueocean-web:1.27.4
+    - blueocean-rest:1.27.4
+    - blueocean-rest-impl:1.27.4
+    - blueocean-pipeline-scm-api:1.27.4
+    - blueocean-pipeline-api-impl:1.27.4
+    - blueocean-jwt:1.27.4
+    - blueocean-i18n:1.27.4
+    - blueocean-core-js:1.27.4
+    - blueocean-commons:1.27.4
+    - jenkins-design-language:1.27.4
+    - ansicolor:1.0.2
     - publish-over-ssh:1.24
-    - role-strategy:530.ved5445d4875a_
-    - allure-jenkins-plugin:2.30.2
+    - role-strategy:631.va_dd0d500b_fc5
+    - allure-jenkins-plugin:2.30.3
     - purge-job-history:1.6
-    - schedule-build:301.vfdc555a_b_cf81
-    - okhttp-api:4.9.3-105.vb96869f8ac3a
-    - log-parser:2.2
-    - prometheus:2.0.11
-    - simple-theme-plugin:103.va_161d09c38c7
+    - schedule-build:448.vb_1dccb_0961b_d
+    - okhttp-api:4.10.0-136.v1d8ce1b_1db_72
+    - log-parser:2.3.0
+    - prometheus:2.2.2
+    - simple-theme-plugin:160.vb_76454b_67900
     - build-history-metrics-plugin:97.vdcf3aa48af8d
-    - metrics:4.1.6.2
-    - uno-choice:2.6.3
-    - font-awesome-api:6.1.1-1
-    - nexus-artifact-uploader:2.13
-    - rebuild:1.34
+    - metrics:4.2.13-420.vea_2f17932dd6
+    - uno-choice:2.6.5
+    - font-awesome-api:6.3.0-2
+    - nexus-artifact-uploader:2.14
+    - rebuild:320.v5a_0933a_e7d61
     - description-setter:1.10
     - describe-with-params:1.0
-    - dingding-notifications:2.4.7
-    - jacoco:3.3.2
-    - elastic-axis:1.6.0
-    - slave-status:1.6
-    - maven-plugin:3.19
-    - monitoring:1.91.0
-    - plugin-util-api:2.17.0
+    - dingding-notifications:2.7.0
+    - jacoco:3.3.3
+    - elastic-axis:409.v304cee6e7b_55
+    - slave-status:56.v1798df8ff586
+    - maven-plugin:3.22
+    - monitoring:1.94.0
+    - plugin-util-api:3.2.1
     - windows-slaves:1.8.1
-    - cloudbees-disk-usage-simple:0.10
-    - ssh-agent:295.v9ca_a_1c7cc3a_a_
-    - ssh-slaves:1.834.v622da_57f702c
-    - ssh-credentials:291.v8211e4f8efb_c
-    - mina-sshd-api-core:2.8.0-30.vf9df64641cb_d
-    - credentials:1139.veb_9579fca_33b_
-    - pipeline-stage-view:2.24
-    - build-timeout:1.21
-    - sonar:2.14
-    - git-server:1.11
-    - gitlab-plugin:1.5.35
-    - jobConfigHistory:1156.v536a_97b_8d649
+    - cloudbees-disk-usage-simple:178.v1a_4d2f6359a_8
+    - ssh-agent:333.v878b_53c89511
+    - ssh-slaves:2.877.v365f5eb_a_b_eec
+    - ssh-credentials:305.v8f4381501156
+    - mina-sshd-api-core:2.10.0-69.v28e3e36d18eb_
+    - credentials:1254.vb_96f366e7b_a_d
+    - pipeline-stage-view:2.32
+    - build-timeout:1.30
+    - sonar:2.15
+    - git-server:99.va_0826a_b_cdfa_d
+    - gitlab-plugin:1.7.12
+    - jobConfigHistory:1207.vd28a_54732f92
     - greenballs:1.15.1
-    - junit:1119.1121.vc43d0fc45561
-    - snakeyaml-api:1.30.2-76.vc104f7ce9870
-    - instance-identity:116.vf8f487400980
-    - matrix-auth:3.1.5
-    - sshd:3.242.va_db_9da_b_26a_c3
-    - workflow-durable-task-step:1190.vc93d7d457042
-    - javax-activation-api:1.2.0-4
-    - javax-mail-api:1.6.2-7
-    - mailer:438.v02c7f0a_12fa_4
-    - workflow-basic-steps:980.v82219a_ed188e
+    - junit:1198.ve38db_d1b_c975
+    - snakeyaml-api:1.33-95.va_b_a_e3e47b_fa_4
+    - instance-identity:142.v04572ca_5b_265
+    - matrix-auth:3.1.7
+    - sshd:3.275.v9e17c10f2571
+    - workflow-durable-task-step:1247.v7f9dfea_b_4fd0
+    - javax-activation-api:1.2.0-6
+    - javax-mail-api:1.6.2-9
+    - mailer:457.v3f72cb_e015e5
+    - workflow-basic-steps:1017.vb_45b_302f0cea_
 
 
   # Set to false to download the minimum required version of all dependencies.
@@ -480,7 +490,7 @@ controller:
   updateStrategy: {}
 
   ingress:
-    enabled: false
+    enabled: true
     # Override for the default paths that map requests to the backend
     paths: []
     # - backend:
@@ -500,11 +510,11 @@ controller:
     # kubernetes.io/tls-acme: "true"
     # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
     # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
-    # ingressClassName: nginx
+    ingressClassName: nginx
     # Set this path to jenkinsUriPrefix above or use annotations to rewrite path
     # path: "/jenkins"
     # configures the hostname e.g. jenkins.example.com
-    hostName:
+    hostName: jenkins.internal.local
     tls:
     # - secretName: jenkins.cluster.local
     #   hosts:
@@ -650,14 +660,14 @@ agent:
   kubernetesReadTimeout: 15
   maxRequestsPerHostStr: "32"
   namespace:
-  image: "nexus.internal:8082/local/jenkins/jenkins-inbound-all-in-one"
-  tag: "4.11-1-alpine"
+  image: "jenkins/inbound-agent"
+  tag: "3107.v665000b_51092-5-alpine-jdk17"
   workingDir: "/home/jenkins/agent"
   nodeUsageMode: "NORMAL"
   customJenkinsLabels: []
   # name of the secret to be used for image pulling
   imagePullSecretName:
-  componentName: "agent-all-in-one"
+  componentName: "agent"
   websocket: false
   privileged: false
   runAsUser:
@@ -829,7 +839,7 @@ agent:
              mountPath: "/etc/docker/daemon.json"
        containers:
          - name : jnlp
-           image: jenkins/inbound-agent:4.11-1-alpine
+           image: jenkins/inbound-agent:3107.v665000b_51092-5-alpine-jdk17
            alwaysPullImage: true
            command:
            args: ""
@@ -864,7 +874,7 @@ agent:
              readOnly: false
        containers:
          - name : jnlp
-           image: jenkins/inbound-agent:4.11-1-alpine
+           image: jenkins/inbound-agent:3107.v665000b_51092-5-alpine-jdk17
            command:
            args: ""
            ttyEnabled: false

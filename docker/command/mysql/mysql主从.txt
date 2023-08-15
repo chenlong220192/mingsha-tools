@@ -1,0 +1,70 @@
+主从  主要是：
+	通过调取主服务器上的binlog日志，在本地重做对应的库，表，实现与主服务器的数据同步
+
+server_id：一般对应主机名或者自定义，主从id 不能一致
+
+状态查看命令：
+	show slave status; 	从服务器查询：
+	
+1主1从搭建。
+
+一，配置主服务器
+1，启用binlog
+]# vim /etc/my.cnf
+ [mysqld]
+  server_id=51            //server_id
+log_bin=master51        //日志名
+:wq
+]# systemctl  restart mysqld
+
+2，用户授权：		（用于从服务器复制数据）
+]# mysql -uroot -p密碼		使用root进入数据库
+mysql> grant  replication slave on *.*  to repluser@"%" identified  by "密码";
+mysql>quit
+
+3）查看binlog日志信息
+mysql> show master status\G;	查看日志文件名 和 偏移量位置。
+	File: master51.000001 //日志名
+	Position: 441 //偏移量
+
+二，配置从服务器
+1，指定server_id
+]# vim /etc/my.cnf		修改主配置文件增加server_id 并重启服务
+                        [mysqld]
+                        server_id=52   //server_id值
+
+2，确保从服务器与住服务器数据一致（备份然后同步到从）（新搭建的环境可以不用做此操作）
+主服务器操作：
+]# mysqldump  -uroot  –p密码   --master-data   数据库名   > /allbak.sql  //在主服务器上备份数据
+		                                 --all-databases
+]# scp  /allbak.sql    root@从服务器ip:/root/   //将备份文件拷贝给从服务器
+从服务器操作：
+mysql> create database 数据库名 ;  //在从服务器上创建与主服务器同名的数据库
+]# mysql  -uroot –p密码  数据库名  <  /root/allbak.sql //从服务器使用备份文件恢复数据
+]# vim /root/allbak.sql //在从服务器查看备份文件中的binlog日志信息
+CHANGE MASTER TO MASTER_LOG_FILE='master51.000001', MASTER_LOG_POS=441; //日志名与偏移量
+
+3，指定主服务器信息（需要root进入数据库）
+mysql> show slave status;
+mysql> change   master  to //指定主服务器
+    -> master_host=“IP”,                 	//主服务器ip地址
+    -> master_user=“用户名”,                    	//主服务器授权用户
+    -> master_password=“密码”,           	//主服务器授权用户密码
+    -> master_log_file=“master51-bin.000001”	//主服务器日志文件
+    -> master_log_pos=441;                  		//主服务器日志偏移量
+
+mysql> start  slave;
+
+mysql> show slave status\G; 		//查看状态信息（除了以上信息还需要看到）
+             Slave_IO_Running: Yes        //IO线程yes状态
+             Slave_SQL_Running: Yes        //SQL线程yes状态
+
+三，测试主从是否成功：
+1）在主服务器添加访问数据的连接用户，授权用户对所有数据有增删改查的权限
+grant select,insert,update,delete on  *.* to  admin@"%" identified by "密码";
+
+2）测试机连接主服务器插入修改数据
+3）在从服务器上查询是否同步成功
+
+
+
