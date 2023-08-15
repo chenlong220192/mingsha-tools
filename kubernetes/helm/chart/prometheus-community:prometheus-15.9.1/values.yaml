@@ -1635,6 +1635,7 @@ serverFiles:
         static_configs:
           - targets:
             - 10.0.0.1:9100
+            - 192.168.1.7:9100
 
       - job_name: Node-Synology
         metrics_path: /metrics
