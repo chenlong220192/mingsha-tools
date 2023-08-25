@@ -1825,6 +1825,7 @@ serverFiles:
         static_configs:
           - targets:
             - aibms-eureka.aibms-local-k8s.svc.cluster.local:8076
+            - aibms-bee.aibms-local-k8s.svc.cluster.local:8769
             - aibms-zuul.aibms-local-k8s.svc.cluster.local:8075
             - aibms-console.aibms-local-k8s.svc.cluster.local:8086
             - aibms-cmdb.aibms-local-k8s.svc.cluster.local:8087
