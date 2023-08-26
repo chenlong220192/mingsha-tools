@@ -1842,6 +1842,16 @@ serverFiles:
             - aibms-prometheus-exporter-aliyun-sls.aibms-local-k8s.svc.cluster.local:9999
       # AIBMS end
 
+      # Eproe start
+      - job_name: Eproe-spring-boot
+        metrics_path: /actuator/prometheus
+        scrape_interval: 30s
+        scrape_timeout: 15s
+        static_configs:
+          - targets:
+            - eproe-spring-boot-template.eproe-local.svc.cluster.local:8888
+      # Eproe end
+
       # A scrape configuration for running Prometheus on a Kubernetes cluster.
       # This uses separate scrape configs for cluster components (i.e. API server, node)
       # and services to allow each to use different authentication configs.
