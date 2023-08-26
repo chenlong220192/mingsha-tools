@@ -15,21 +15,21 @@ broker:
     jvmMemory: "-Xms1g -Xmx1g"
     resources:
       limits:
-        cpu: 4
-        memory: 16Gi
+        cpu: 2
+        memory: 2Gi
       requests:
         cpu: 200m
-        memory: 2Gi
+        memory: 1Gi
 
   replica:
     jvmMemory: "-Xms1g -Xmx1g"
     resources:
       limits:
-        cpu: 4
-        memory: 16Gi
+        cpu: 2
+        memory: 2Gi
       requests:
         cpu: 50m
-        memory: 2Gi
+        memory: 1Gi
 
   persistence:
     enabled: true
@@ -63,12 +63,12 @@ nameserver:
 
   resources:
     limits:
-      cpu: 2
-      memory: 6Gi
+      cpu: 1
+      memory: 1Gi
       ephemeral-storage: 8Gi
     requests:
       cpu: 100m
-      memory: 2Gi
+      memory: 1Gi
       ephemeral-storage: 1Gi
 
   persistence:
@@ -103,7 +103,7 @@ dashboard:
   resources:
     limits:
       cpu: 1
-      memory: 2Gi
+      memory: 1Gi
     requests:
       cpu: 20m
       memory: 512Mi
