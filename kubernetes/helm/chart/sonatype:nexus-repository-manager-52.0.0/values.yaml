@@ -6,7 +6,7 @@ deploymentStrategy: Recreate
 image:
   # Sonatype Official Public Image
   repository: sonatype/nexus3
-  tag: 3.52.0
+  tag: 3.59.0
   pullPolicy: IfNotPresent
 imagePullSecrets:
 # for image registries that require login, specify the name of the existing
@@ -43,12 +43,12 @@ nexus:
   resources:
   # minimum recommended memory settings for a small, person instance from
   # https://help.sonatype.com/repomanager3/product-information/system-requirements
-  #   requests:
-  #     cpu: 4
-  #     memory: 8Gi
-  #   limits:
-  #     cpu: 4
-  #     memory: 8Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1024Mi
 
   # The ports should only be changed if the nexus image uses a different port
   nexusPort: 8081
@@ -107,12 +107,12 @@ deployment:
   additionalVolumeMounts:
 
 ingress:
-  enabled: false
+  enabled: true
   ingressClassName: nginx
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
   hostPath: /
-  hostRepo: repo.demo
+  hostRepo: nexus3.internal.local
   # tls:
   #   - secretName: nexus-local-tls
   #     hosts:
