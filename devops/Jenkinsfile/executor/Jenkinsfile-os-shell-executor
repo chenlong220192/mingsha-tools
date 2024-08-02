@@ -1,0 +1,28 @@
+// Jenkinsfile (Declarative Pipeline)
+pipeline {
+
+    parameters{
+        text(name:'command', defaultValue:'', description:'')
+    }
+
+    agent { label 'jenkins-agent-allInOne'}
+
+    stages {
+
+      stage('execute'){
+
+        steps {
+          sh params.command
+        }
+
+      }
+
+    }
+
+    post{
+        always{
+            cleanWs()
+        }
+    }
+
+}

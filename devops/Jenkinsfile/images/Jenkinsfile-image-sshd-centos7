@@ -1,0 +1,84 @@
+// Jenkinsfile (Declarative Pipeline)
+pipeline {
+
+    options {
+        // 丢弃旧的构建
+        buildDiscarder(
+          logRotator(
+            daysToKeepStr: '30',
+            numToKeepStr: '30',
+            artifactDaysToKeepStr: '30',
+            artifactNumToKeepStr: '1'
+          )
+        )
+    }
+
+    environment {
+      REPO_URL = 'https://github.com/chenlong220192/docker-repo.git'
+    }
+
+    parameters{
+        string(name:'BRANCH', defaultValue:'master', description:'目标分支名')
+        choice(
+          name: 'STEP',
+          description: '构建步骤\n【BUILD】-构建镜像；\n【PUSH】-推送；',
+          choices: ['BUILD', 'PUSH']
+        )
+    }
+
+    agent { label 'jenkins-agent-all-in-one' }
+
+    // job
+    stages {
+
+      stage('git checkout') {
+          steps {
+            script {
+              sh 'git clone -b ' + params.BRANCH + ' --depth 1 ' + env.REPO_URL + ' temp'
+            }
+          }
+      }
+
+      stage('build') {
+          when {
+              expression {
+                  return (['BUILD','PUSH'].contains(params.STEP))
+              }
+          }
+          steps {
+              script {
+                sh '''
+                  cd ./temp/bee/images
+                  docker build -f Dockerfile-sshd --rm -t local/sshd:centos7 .
+                  docker tag local/sshd:centos7 nexus.internal:8082/local/local/sshd:centos7
+                  docker rmi -f local/centos7:sshd
+                '''
+              }
+          }
+      }
+
+      stage('push') {
+          when {
+              expression {
+                  return (['PUSH'].contains(params.STEP))
+              }
+          }
+          steps {
+              script {
+                sh '''
+                  sudo docker push nexus.internal:8082/local/local/sshd:centos7
+                '''
+              }
+          }
+      }
+
+    }
+
+    // job
+    post{
+        always{
+          cleanWs()
+        }
+    }
+
+}

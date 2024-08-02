@@ -1,0 +1,25 @@
+// Jenkinsfile (Declarative Pipeline)
+pipeline {
+
+    agent { label 'jenkins-agent-pure-jnlp' }
+
+    stages {
+
+      stage('run docker') {
+          steps {
+              echo '!!!~~~ run docker ~~~!!!'
+              sh '''
+                sudo docker info
+              '''
+          }
+      }
+
+    }
+
+    post{
+        always{
+            cleanWs()
+        }
+    }
+
+}

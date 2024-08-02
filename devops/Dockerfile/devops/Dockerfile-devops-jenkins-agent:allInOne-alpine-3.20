@@ -1,0 +1,47 @@
+# 1、基础镜像
+FROM jenkins/inbound-agent:3256.v88a_f6e922152-4-alpine
+
+# 2、镜像作者和电子邮箱
+MAINTAINER chenlong "chenlong220192@gmail.com"
+
+# 3、切换root用户
+USER root
+
+# 4、更换Alpine源
+RUN echo http://mirrors.tuna.tsinghua.edu.cn/alpine/v3.20/main > /etc/apk/repositories && \
+    echo http://mirrors.tuna.tsinghua.edu.cn/alpine/v3.20/community >> /etc/apk/repositories && \
+    apk update && apk upgrade && \
+    apk --no-cache add ca-certificates
+
+# 5、使用root权限安装相关工具
+RUN apk add --no-cache \
+    busybox-extras \
+    sudo \
+    make \
+    vim \
+    curl \
+    wget \
+    zip \
+    unzip \
+    git \
+    docker
+
+# 6、给jenkins用户sudo权限
+RUN echo "jenkins ALL=NOPASSWD: ALL" >> /etc/sudoers
+
+# 7、容器初始化脚本
+RUN mkdir -p /data && \
+    echo '#!/bin/bash' > /data/init.sh && \
+    echo '/usr/local/bin/jenkins-agent' >> /data/init.sh && \
+    chmod -R 755 /data/init.sh
+
+# 8、切换jenkins用户
+USER jenkins
+
+# 9、容器启动后执行命令
+ENTRYPOINT ["/data/init.sh"]
+
+# 构建命令
+#### docker build -f Dockerfile-devops-jenkins-agent:allInOne-alpine-3.20 --rm -t devops/jenkins-agent:allInOne-alpine-3.20 .
+#### docker tag devops/jenkins-agent:allInOne-alpine-3.20 site.mingsha:5555/devops/jenkins-agent:allInOne-alpine-3.20
+#### docker push site.mingsha:5555/devops/jenkins-agent:allInOne-alpine-3.20

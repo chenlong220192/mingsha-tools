@@ -1,0 +1,61 @@
+// Jenkinsfile (Declarative Pipeline)
+pipeline {
+
+    environment {
+      REPO_URL = 'https://github.com/chenlong220192/cicd-repo.git'
+      APP_NAME = 'cicd-repo'
+    }
+
+    agent { label 'jenkins-agent-containers-specify'}
+
+    stages {
+
+      stage('fetch') {
+          steps {
+            container(name:'fetch'){
+              script {
+                sh 'git clone -b master --depth 1 ' + env.REPO_URL + ' temp'
+              }
+            }
+          }
+      }
+
+      stage('compile') {
+          steps {
+            container(name:'compile'){
+              script {
+                sh '''
+                  cd temp
+                  make package.uncompress SKIP_TEST=true ENV=local
+                '''
+              }
+            }
+          }
+      }
+
+      stage('build') {
+          steps {
+            container(name:'build'){
+              script {
+                sh '''
+                  cd temp
+                  make docker.build SKIP_TEST=true ENV=local
+                '''
+              }
+            }
+          }
+      }
+
+      stage('deploy') {
+          steps {
+            container(name:'deploy'){
+              script {
+                sh 'whoami'
+              }
+            }
+          }
+      }
+
+    }
+
+}

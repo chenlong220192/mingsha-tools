@@ -1,0 +1,13 @@
+# 1、基础镜像
+FROM site.mingsha:5555/base/dragonwell:jdk17-alpine-3.20
+
+# 2、安装基础工具
+RUN apk add --no-cache bash make
+
+# 3、容器启动后执行命令
+CMD ["docker","version"]
+
+# 构建命令
+#### docker build -f Dockerfile-devops-jenkins-agent:jdk17-alpine-3.20 --rm -t devops/jenkins-agent:jdk17-alpine-3.20 .
+#### docker tag devops/jenkins-agent:jdk17-alpine-3.20 site.mingsha:5555/devops/jenkins-agent:jdk17-alpine-3.20
+#### docker push site.mingsha:5555/devops/jenkins-agent:jdk17-alpine-3.20

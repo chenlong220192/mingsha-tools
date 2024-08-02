@@ -1,0 +1,27 @@
+// Jenkinsfile (Declarative Pipeline)
+pipeline {
+
+    parameters{
+        string(name:'project', defaultValue:'demo', description:'项目名')
+        string(name:'branch', defaultValue:'master', description:'分支名')
+    }
+
+    agent { label 'linux' }
+
+    stages {
+
+      stage('confirm') {
+        steps {
+          input message: 'Should we continue?', ok: 'Yes,we should.', parameters: [string(defaultValue: 'admin', description: 'Who should I say hello to?', name: 'PERSON')], submitter: 'admin'
+        }
+      }
+
+    }
+
+    post{
+        always{
+            cleanWs()
+        }
+    }
+
+}

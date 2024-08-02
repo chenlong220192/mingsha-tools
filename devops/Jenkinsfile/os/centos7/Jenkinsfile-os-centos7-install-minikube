@@ -1,0 +1,99 @@
+// Jenkinsfile (Declarative Pipeline)
+pipeline {
+
+    parameters{
+        string(name:'SERVER', defaultValue:'centos7', description:'服务器')
+    }
+
+    agent { label 'master || linux'}
+
+    stages {
+      stage('SSH'){
+        when {
+            expression {
+                if(params.SERVER == null || params.SERVER.equals("")){
+                  throw new Exception("params.SERVER not found")
+                }
+                return true
+            }
+        }
+        steps {
+          // publisher
+          sshPublisher failOnError: true,
+              publishers: [
+                  sshPublisherDesc(
+                      configName: params.SERVER,
+                      verbose: true,
+                      usePromotionTimestamp: false,
+                      useWorkspaceInPromotion: false,
+                      transfers: [
+                          sshTransfer(
+                              flatten: false,
+                              cleanRemote: true,
+                              makeEmptyDirs: false,
+                              noDefaultExcludes: false,
+                              remoteDirectorySDF: false,
+                              patternSeparator: '[, ]+',
+                              excludes: '',
+                              execCommand: '''
+
+                                wget https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+                                sudo install minikube-linux-amd64 /usr/local/bin/minikube
+                                useradd minikube
+                                sudo usermod -aG docker minikube
+
+                                echo '启动minikube'
+                                su minikube <<EOF
+                                minikube start -v 10 --logtostderr --alsologtostderr \
+                                  --driver=docker  \
+                                  --container-runtime=containerd \
+                                  --nodes=1 \
+                                  --cpus=2 \
+                                  --memory=4G \
+                                  --listen-address='0.0.0.0' \
+                                  --disk-size=20G \
+                                  --image-repository=auto \
+                                  --image-mirror-country=cn \
+                                  --registry-mirror="https://wivp6w5w.mirror.aliyuncs.com" \
+                                  --insecure-registry="" \
+                                  --interactive=true \
+                                  --install-addons=true \
+                                  --output=json \
+                                  --kubernetes-version=v1.26.1
+EOF
+
+                                wget https://dl.k8s.io/release/v1.22.3/bin/linux/amd64/kubectl
+                                sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+                                echo 'k8s 集群信息'
+                                su minikube <<EOF
+                                  kubectl cluster-info
+EOF
+
+                                yum install -y bash-completion
+                                source /usr/share/bash-completion/bash_completion
+
+                                echo '配置 bash-completion'
+                                su minikube <<EOF
+                                  echo "source <(kubectl completion bash)" >> ~/.bash_profile && \
+                                  source ~/.bash_profile
+EOF
+
+
+                              ''',
+                              execTimeout: 600000
+                          )
+                      ]
+                  )
+              ]
+        }
+      }
+    }
+
+    post{
+        always{
+            cleanWs()
+        }
+    }
+
+}

@@ -1,0 +1,217 @@
+// Jenkinsfile (Declarative Pipeline)
+pipeline {
+
+    environment {
+      REPO_URL = 'https://github.com/chenlong220192/cicd-repo.git'
+      APP_NAME = 'cicd-repo'
+    }
+
+    agent { label 'jenkins-agent-allInOne'}
+
+    options {
+        // 丢弃旧的构建
+        buildDiscarder(
+          logRotator(
+            daysToKeepStr: '30',
+            numToKeepStr: '100',
+            artifactDaysToKeepStr: '30',
+            artifactNumToKeepStr: '1'
+          )
+        )
+    }
+
+    parameters{
+        choice(
+          name: 'SERVER',
+          description: '服务器',
+          choices: ['helm-server']
+        )
+        choice(
+          name: 'ENV',
+          description: '环境配置',
+          choices: ['local']
+        )
+        string(name:'BRANCH', defaultValue:'master', description:'分支名')
+        choice(
+          name: 'STEP',
+          description: '执行步骤\n【INTEGRATION_ANALYSIS】-代码静态分析；\n【INTEGRATION_UNIT_TEST】-单元测试；\n【INTEGRATION_PACKAGE】-打包；\n【INTEGRATION_IMAGE】-构建镜像；\n【DEPLOYMENT】-部署；',
+          choices: ['DEPLOYMENT', 'INTEGRATION_ANALYSIS', 'INTEGRATION_UNIT_TEST', 'INTEGRATION_PACKAGE', 'INTEGRATION_IMAGE']
+        )
+    }
+
+    stages {
+
+      stage("Params-Validation"){
+        steps {
+            script {
+               if(!['INTEGRATION_ANALYSIS','INTEGRATION_UNIT_TEST','INTEGRATION_PACKAGE','INTEGRATION_IMAGE','DEPLOYMENT'].contains(params.STEP)){
+                  result = "执行步骤【"+params.STEP+"】无法识别，请校验后重新发起构建。";
+                  throw new Exception(result)
+               }
+            }
+        }
+      }
+
+      stage('SCM') {
+          steps {
+            script {
+              sh 'git clone -b ' + params.BRANCH + ' --depth 1 ' + env.REPO_URL + ' temp'
+              cd temp
+            }
+          }
+      }
+
+      stage('CI'){
+        when {
+            expression {
+                return (['INTEGRATION_ANALYSIS','INTEGRATION_UNIT_TEST','INTEGRATION_PACKAGE','INTEGRATION_IMAGE','DEPLOYMENT'].contains(params.STEP))
+            }
+        }
+        stages {
+
+          stage('Parallel Static Analysis') {
+
+            parallel {
+
+                stage('Static Analysis') {
+                    when {
+                        expression {
+                            return (['INTEGRATION_ANALYSIS','INTEGRATION_UNIT_TEST','INTEGRATION_PACKAGE','INTEGRATION_IMAGE','DEPLOYMENT'].contains(params.STEP))
+                        }
+                    }
+                    steps {
+                        echo '// TODO SonarQube Static Analysis.'
+                    }
+                    post {
+                        success {
+                            echo '// TODO Archive the Static Analysis Result.'
+                        }
+                    }
+                }
+
+            }
+
+          }
+
+          stage('Unit Test') {
+              when {
+                  expression {
+                      return (['INTEGRATION_UNIT_TEST','INTEGRATION_PACKAGE','INTEGRATION_IMAGE','DEPLOYMENT'].contains(params.STEP))
+                  }
+              }
+              steps {
+                  sh '''
+                    make test
+                  '''
+              }
+              post {
+                  success{
+                      allure([ includeProperties: false, jdk: '', properties: [], reportBuildPolicy: 'ALWAYS', results: [[path: 'target/allure-results']] ])
+                  }
+              }
+          }
+
+          stage('Package') {
+              when {
+                  expression {
+                      return (['INTEGRATION_PACKAGE','INTEGRATION_IMAGE','DEPLOYMENT'].contains(params.STEP))
+                  }
+              }
+              steps {
+                  sh 'make package.uncompress SKIP_TEST=true ENV='+params.ENV
+              }
+              post {
+                  success{
+                      archiveArtifacts 'target/*.tar.gz'
+                  }
+              }
+          }
+
+          stage("Docker"){
+            when {
+                expression {
+                    return (['INTEGRATION_IMAGE','DEPLOYMENT'].contains(params.STEP))
+                }
+            }
+
+            stages {
+
+              stage('Build') {
+                  steps {
+                        sh 'make docker.init ENV='+params.ENV
+                        sh 'make docker.build SKIP_TEST=true ENV='+params.ENV
+                  }
+              }
+              stage('Push') {
+                steps {
+                    sh 'make docker.push ENV='+params.ENV
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+
+      }
+
+      stage('CD'){
+        when {
+            expression {
+                return (['DEPLOYMENT'].contains(params.STEP))
+            }
+        }
+        steps {
+          // 10分钟超时
+          timeout(time: 10, unit: 'MINUTES') {
+            // 重试5次
+            retry(2) {
+              // publisher
+              sshPublisher failOnError: true,
+                  publishers: [
+                      sshPublisherDesc(
+                          configName: params.SERVER,
+                          verbose: true,
+                          usePromotionTimestamp: false,
+                          useWorkspaceInPromotion: false,
+                          transfers: [
+                              sshTransfer(
+                                  usePty: false,
+                                  flatten: false,
+                                  cleanRemote: true,
+                                  makeEmptyDirs: false,
+                                  noDefaultExcludes: false,
+                                  remoteDirectorySDF: false,
+                                  patternSeparator: '[, ]+',
+                                  excludes: '',
+                                  execCommand: '''
+                                    wget http://nginx-downloads.internal:9011/springboot-demo-1.0.0.tar.gz
+                                    tar -zxvf springboot-demo-1.0.0.tar.gz -C springboot-demo --strip-components 1
+                                    /usr/local/bin/helm upgrade --install \
+                                      --create-namespace springboot-demo \
+                                      --namespace springboot-demo \
+                                      --version 1.0.0 \
+                                      ./springboot-demo
+                                  ''',
+                                  execTimeout: 600000
+                              )
+                          ]
+                      )
+                  ]
+            }
+          }
+        }
+      }
+
+    }
+
+    // job
+    post{
+        always{
+            cleanWs()
+        }
+    }
+
+}

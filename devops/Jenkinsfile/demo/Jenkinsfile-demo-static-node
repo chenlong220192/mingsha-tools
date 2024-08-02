@@ -1,0 +1,24 @@
+// Jenkinsfile (Declarative Pipeline)
+pipeline {
+
+    agent { label 'linux' }
+
+    stages {
+
+      stage('confirm') {
+        steps {
+          script {
+            echo 'hello'
+          }
+        }
+      }
+
+    }
+
+    post{
+        always{
+            cleanWs()
+        }
+    }
+
+}

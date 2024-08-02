@@ -1,0 +1,58 @@
+// Jenkinsfile (Declarative Pipeline)
+pipeline {
+
+    parameters{
+        string(name:'SERVER', defaultValue:'centos7', description:'服务器')
+    }
+
+    agent { label 'master || linux'}
+
+    stages {
+      stage('SSH'){
+        when {
+            expression {
+                if(params.SERVER == null || params.SERVER.equals("")){
+                  throw new Exception("params.SERVER not found")
+                }
+                return true
+            }
+        }
+        steps {
+          // publisher
+          sshPublisher failOnError: true,
+              publishers: [
+                  sshPublisherDesc(
+                      configName: params.SERVER,
+                      verbose: true,
+                      usePromotionTimestamp: false,
+                      useWorkspaceInPromotion: false,
+                      transfers: [
+                          sshTransfer(
+                              flatten: false,
+                              cleanRemote: true,
+                              makeEmptyDirs: false,
+                              noDefaultExcludes: false,
+                              remoteDirectorySDF: false,
+                              patternSeparator: '[, ]+',
+                              excludes: '',
+                              execCommand: '''
+
+                                yum install -y open-vm-tools
+                                
+                              ''',
+                              execTimeout: 600000
+                          )
+                      ]
+                  )
+              ]
+        }
+      }
+    }
+
+    post{
+        always{
+            cleanWs()
+        }
+    }
+
+}

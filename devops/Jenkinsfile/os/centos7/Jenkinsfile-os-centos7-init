@@ -1,0 +1,76 @@
+// Jenkinsfile (Declarative Pipeline)
+pipeline {
+
+    parameters{
+        string(name:'SERVER', defaultValue:'centos7', description:'服务器')
+    }
+
+    agent { label 'master || linux'}
+
+    stages {
+      stage('SSH'){
+        when {
+            expression {
+                if(params.SERVER == null || params.SERVER.equals("")){
+                  throw new Exception("params.SERVER not found")
+                }
+                return true
+            }
+        }
+        steps {
+          // publisher
+          sshPublisher failOnError: true,
+              publishers: [
+                  sshPublisherDesc(
+                      configName: params.SERVER,
+                      verbose: true,
+                      usePromotionTimestamp: false,
+                      useWorkspaceInPromotion: false,
+                      transfers: [
+                          sshTransfer(
+                              flatten: false,
+                              cleanRemote: true,
+                              makeEmptyDirs: false,
+                              noDefaultExcludes: false,
+                              remoteDirectorySDF: false,
+                              patternSeparator: '[, ]+',
+                              excludes: '',
+                              execCommand: '''
+
+                                sudo sed -e 's|^mirrorlist=|#mirrorlist=|g' \
+                                         -e 's|^#baseurl=http://mirror.centos.org|baseurl=https://mirrors.tuna.tsinghua.edu.cn|g' \
+                                         -i.bak \
+                                         /etc/yum.repos.d/rocky-*.repo
+                                yum clean all && yum makecache
+                                yum update -y
+                                yum install -y kernel-headers kernel-libs kernel-devel kernel-tools
+                                yum install -y gcc glibc gcc-c++ lrzsz tree dos2unix unix2dos
+                                yum install -y perl
+                                yum install -y fuse
+                                yum install -y telnet vim lsof net-tools curl wget make bash-completion zip unzip screen
+                                yum install -y yum-utils epel-release
+                                yum install -y htop
+                                yum install -y nfs-utils
+                                yum clean all
+                                systemctl disable firewalld
+                                systemctl disable postfix
+                                setenforce 0 && sed -i 's/SELINUX=[^<]*/SELINUX=disabled/g' /etc/selinux/config
+                                reboot
+
+                              ''',
+                              execTimeout: 600000
+                          )
+                      ]
+                  )
+              ]
+        }
+      }
+    }
+
+    post{
+        always{
+            cleanWs()
+        }
+    }
+
+}

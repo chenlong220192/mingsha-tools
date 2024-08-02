@@ -1,0 +1,55 @@
+// Jenkinsfile (Declarative Pipeline)
+pipeline {
+
+    parameters{
+        string(name:'SERVER', defaultValue:'centos7', description:'服务器')
+        text(name:'command', defaultValue:'', description:'')
+    }
+
+    agent { label 'master || linux'}
+
+    stages {
+      stage('SSH'){
+        when {
+            expression {
+                if(params.SERVER == null || params.SERVER.equals("")){
+                  throw new Exception("params.SERVER not found")
+                }
+                return true
+            }
+        }
+        steps {
+          // publisher
+          sshPublisher failOnError: true,
+              publishers: [
+                  sshPublisherDesc(
+                      configName: params.SERVER,
+                      verbose: true,
+                      usePromotionTimestamp: false,
+                      useWorkspaceInPromotion: false,
+                      transfers: [
+                          sshTransfer(
+                              flatten: false,
+                              cleanRemote: true,
+                              makeEmptyDirs: false,
+                              noDefaultExcludes: false,
+                              remoteDirectorySDF: false,
+                              patternSeparator: '[, ]+',
+                              excludes: '',
+                              execCommand: params.command,
+                              execTimeout: 600000
+                          )
+                      ]
+                  )
+              ]
+        }
+      }
+    }
+
+    post{
+        always{
+            cleanWs()
+        }
+    }
+
+}

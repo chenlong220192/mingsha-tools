@@ -1,0 +1,61 @@
+// Jenkinsfile (Declarative Pipeline)
+pipeline {
+
+    options {
+        // 丢弃旧的构建
+        buildDiscarder(
+          logRotator(
+            daysToKeepStr: '30',
+            numToKeepStr: '100',
+            artifactDaysToKeepStr: '30',
+            artifactNumToKeepStr: '1'
+          )
+        )
+    }
+
+    environment {
+      REPO_URL = 'https://github.com/chenlong220192/cicd-repo.git'
+      JDK_LABEL = 'oracle-jdk-8u202'
+    }
+
+    parameters{
+        string(name:'branch', defaultValue:'master', description:'分支名')
+    }
+
+    agent { label 'linux' }
+
+    tools {
+        jdk env.JDK_LABEL
+    }
+
+    stages {
+
+      stage('SVM') {
+          steps {
+            script {
+              sh 'git clone -b ' + params.branch + ' --depth 1 ' + env.REPO_URL + ' temp'
+              cd temp
+            }
+          }
+      }
+
+      stage('Unit Test') {
+          steps {
+              make test
+          }
+          post {
+              success{
+                  allure([ includeProperties: false, jdk: '', properties: [], reportBuildPolicy: 'ALWAYS', results: [[path: 'target/allure-results']] ])
+              }
+          }
+      }
+
+    }
+
+    post{
+        always{
+            cleanWs()
+        }
+    }
+
+}
