@@ -1636,6 +1636,7 @@ serverFiles:
         static_configs:
           - targets:
             - 10.8.0.1:9100
+            - 10.0.0.21:9100
 
       - job_name: Node-Windows
         metrics_path: /metrics
