@@ -1,8 +1,8 @@
 # 1、基础镜像
 FROM alpine:3.12
 
-# 2、镜像作者和电子邮箱
-MAINTAINER chenlong "long.chen@eproe.com.cn"
+# 2、镜像作者
+LABEL maintainer="developer chenlong220192@gmail.com"
 
 # 3、缺省语言设置
 ENV LANG=C.UTF-8
@@ -18,7 +18,7 @@ RUN echo http://mirrors.tuna.tsinghua.edu.cn/alpine/v3.12/main > /etc/apk/reposi
 
 # 6、Alpine安装 GNU libc (aka glibc) 参考：https://github.com/sgerrand/alpine-pkg-glibc
 RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
-    ALPINE_GLIBC_PACKAGE_VERSION="2.35-r1" && \
+    ALPINE_GLIBC_PACKAGE_VERSION="2.32-r0" && \
     ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
     ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
     ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \

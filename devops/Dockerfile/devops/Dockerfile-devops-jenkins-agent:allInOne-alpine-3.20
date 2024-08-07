@@ -1,8 +1,8 @@
 # 1、基础镜像
 FROM jenkins/inbound-agent:3256.v88a_f6e922152-4-alpine
 
-# 2、镜像作者和电子邮箱
-MAINTAINER chenlong "chenlong220192@gmail.com"
+# 2、镜像作者
+LABEL maintainer="developer chenlong220192@gmail.com"
 
 # 3、切换root用户
 USER root

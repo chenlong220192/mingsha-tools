@@ -1,8 +1,8 @@
 # 1、基础镜像
 FROM alpine:3.20
 
-# 2、镜像作者和电子邮箱
-MAINTAINER chenlong "chenlong220192@gmail.com"
+# 2、镜像作者
+LABEL maintainer="developer chenlong220192@gmail.com"
 
 # 3、缺省语言设置
 ENV LANG=C.UTF-8
