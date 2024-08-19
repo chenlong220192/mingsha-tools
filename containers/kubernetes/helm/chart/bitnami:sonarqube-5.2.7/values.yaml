@@ -769,6 +769,10 @@ plugins:
   ##    - "https://github.com/SonarSource/sonar-ldap/releases/download/2.2-RC3/sonar-ldap-plugin-2.2.0.601.jar"
   ##
   install: []
+    # - https://github.com/checkstyle/sonar-checkstyle/releases/download/10.17.0/checkstyle-sonar-plugin-10.17.0.jar
+    # - https://github.com/spotbugs/sonar-findbugs/releases/download/4.2.10/sonar-findbugs-plugin-4.2.10.jar
+    # - https://github.com/jborgers/sonar-pmd/releases/download/3.5.1/sonar-pmd-plugin-3.5.1.jar
+
   ## @param plugins.netrcCreds .netrc secret file with a key "netrc" to use basic auth while downloading plugins
   ##
   netrcCreds: ""
@@ -1018,7 +1022,7 @@ metrics:
   jmx:
     ## @param metrics.jmx.enabled Whether or not to expose JMX metrics to Prometheus
     ##
-    enabled: false
+    enabled: true
     ## Bitnami JMX exporter image
     ## ref: https://hub.docker.com/r/bitnami/jmx-exporter/tags/
     ## @param metrics.jmx.image.registry [default: REGISTRY_NAME] JMX exporter image registry

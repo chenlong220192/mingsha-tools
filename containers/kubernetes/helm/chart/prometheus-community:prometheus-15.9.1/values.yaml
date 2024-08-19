@@ -1779,6 +1779,14 @@ serverFiles:
           - targets:
             - jenkins.jenkins.svc.cluster.local:8080
 
+      - job_name: Middleware-SonarQube
+        metrics_path: /metrics
+        scrape_interval: 30s
+        scrape_timeout: 15s
+        static_configs:
+          - targets:
+            - sonarqube-jmx-metrics.sonarqube.svc.cluster.local:10443
+
       - job_name: Middleware-RocketMQ
         metrics_path: /metrics
         scrape_interval: 30s
