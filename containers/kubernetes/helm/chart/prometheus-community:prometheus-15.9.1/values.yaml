@@ -669,7 +669,7 @@ server:
   ##
   image:
     repository: quay.io/prometheus/prometheus
-    tag: v2.53.1
+    tag: v2.54.1
     pullPolicy: IfNotPresent
 
   ## prometheus server priorityClassName
@@ -1142,7 +1142,7 @@ pushgateway:
   ##
   image:
     repository: prom/pushgateway
-    tag: v1.9.0
+    tag: v1.10.0
     pullPolicy: IfNotPresent
 
   ## pushgateway priorityClassName
